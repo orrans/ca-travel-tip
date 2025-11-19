@@ -19,9 +19,14 @@ window.app = {
     onSetFilterBy,
 }
 
+ let isAltTheme = false
+
 function onInit() {
     getFilterByFromQueryParams()
     loadAndRenderLocs()
+document.querySelector('.btn-theme')
+        .addEventListener('click', onToggleTheme)
+    setThemeButtonText()
     mapService
         .initMap()
         .then(() => {
@@ -352,4 +357,26 @@ function cleanStats(stats) {
         return acc
     }, [])
     return cleanedStats
+}
+
+function onToggleTheme() {
+    const root = document.documentElement
+    const btn = document.querySelector('.btn-theme')
+
+    root.classList.toggle('alt-theme')
+
+    btn.innerText =
+        root.classList.contains('alt-theme')
+            ? 'Purple theme'
+            : 'Blue theme'
+}
+
+function setThemeButtonText() {
+    const root = document.documentElement
+    const btn = document.querySelector('.btn-theme')
+
+    btn.innerText =
+        root.classList.contains('alt-theme')
+            ? 'Purple theme'
+            : 'Blue theme'
 }

@@ -38,6 +38,9 @@
             <div class="map"></div>
             <div>
                 <section class="locs-container">
+                    <section class="toggle-theme-container">
+                    <button class="btn-theme">Theme</button>
+                </section>
                     <section class="loc-filter">
                         <div>
                             <input
@@ -89,6 +92,27 @@
         </main>
         <pre class="debug" hidden></pre>
         <div class="user-msg"></div>
+
+        <dialog class="loc-dialog">
+        <form method="dialog">
+            <h3 class="dialog-title"></h3>
+
+            <label>
+                Name:
+                <input name="loc-name" type="text" required>
+            </label>
+
+            <label>
+                Rate:
+                <input name="loc-rate" type="number" min="1" max="5" required>
+            </label>
+
+            <menu>
+                <button value="cancel" class="btn-cancel">Cancel</button>
+                <button value="save" class="btn-save">Save</button>
+            </menu>
+        </form>
+    </dialog>
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script type="module" src="js/app.controller.js"></script>
