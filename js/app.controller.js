@@ -18,9 +18,14 @@ window.app = {
     onSetFilterBy,
 }
 
+let isAltTheme = false
+
 function onInit() {
     getFilterByFromQueryParams()
     loadAndRenderLocs()
+    document.querySelector('.btn-theme')
+        .addEventListener('click', onToggleTheme)
+    setThemeButtonText()
     mapService.initMap()
         .then(() => {
             // onPanToTokyo()
@@ -70,26 +75,26 @@ function renderLocs(locs) {
 
 function onRemoveLoc(locId) {
     Swal.fire({
-    title: 'Delete this location?',
-    text: 'This action cannot be undone.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Delete',
-    cancelButtonText: 'Cancel'
-}).then(res => {
-    if (!res.isConfirmed) return
+        title: 'Delete this location?',
+        text: 'This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel'
+    }).then(res => {
+        if (!res.isConfirmed) return
 
-    locService.remove(locId)
-        .then(() => {
-            flashMsg('Location removed')
-            unDisplayLoc()
-            loadAndRenderLocs()
-        })
-        .catch(err => {
-            console.error('OOPs:', err)
-            flashMsg('Cannot remove location')
-        })
-})
+        locService.remove(locId)
+            .then(() => {
+                flashMsg('Location removed')
+                unDisplayLoc()
+                loadAndRenderLocs()
+            })
+            .catch(err => {
+                console.error('OOPs:', err)
+                flashMsg('Cannot remove location')
+            })
+    })
 }
 
 function onSearchAddress(ev) {
@@ -106,7 +111,8 @@ function onSearchAddress(ev) {
 }
 
 function onAddLoc(geo) {
-    const locName = prompt('Loc name', geo.address || 'Just a place')
+    const locName = openLocDialog('add', null, geo)
+    // const locName = prompt('Loc name', geo.address || 'Just a place')
     if (!locName) return
 
     const loc = {
@@ -125,6 +131,7 @@ function onAddLoc(geo) {
             flashMsg('Cannot add location')
         })
 }
+
 
 function loadAndRenderLocs() {
     locService.query()
@@ -152,7 +159,8 @@ function onPanToUserPos() {
 function onUpdateLoc(locId) {
     locService.getById(locId)
         .then(loc => {
-            const rate = +prompt('New rate?', loc.rate)
+            const rate = openLocDialog('edit', loc)
+            // const rate = +prompt('New rate?', loc.rate)
             if (rate && rate !== loc.rate) {
                 loc.rate = rate
                 locService.save(loc)
@@ -176,6 +184,44 @@ function onSelectLoc(locId) {
             console.error('OOPs:', err)
             flashMsg('Cannot display this location')
         })
+}
+
+function openLocDialog(mode, loc = null, geo = null) {
+
+    const dialog = document.querySelector('.loc-dialog')
+    const elCancelBtn = document.querySelector('.btn-cancel')
+    dialog.querySelector('.dialog-title').innerText =
+        (mode === 'add') ? 'Add Location' : 'Edit Location'
+
+    dialog.querySelector('[name=loc-name]').value =
+        (mode === 'edit') ? loc.name : (geo?.address || '')
+
+    dialog.querySelector('[name=loc-rate]').value =
+        (mode === 'edit') ? loc.rate : 3
+elCancelBtn.onclick=()=>{
+    dialog.close('cancel')
+}
+    dialog.showModal()
+   
+    dialog.addEventListener('close', () => {
+console.log(dialog.returnValue)
+        if (dialog.returnValue !== 'save') return
+
+        const name = dialog.querySelector('[name=loc-name]').value
+        const rate = +dialog.querySelector('[name=loc-rate]').value
+
+        if (mode === 'add') {
+            locService.save({ name, rate, geo })
+                .then(savedLoc => {
+                    utilService.updateQueryParams({ locId: savedLoc.id })
+                    loadAndRenderLocs()
+                })
+        } else {
+            loc.name = name
+            loc.rate = rate
+            locService.save(loc).then(loadAndRenderLocs)
+        }
+    }, { once: true })
 }
 
 function displayLoc(loc) {
@@ -234,7 +280,7 @@ function getFilterByFromQueryParams() {
     const queryParams = new URLSearchParams(window.location.search)
     const txt = queryParams.get('txt') || ''
     const minRate = queryParams.get('minRate') || 0
-    locService.setFilterBy({txt, minRate})
+    locService.setFilterBy({ txt, minRate })
 
     document.querySelector('input[name="filter-by-txt"]').value = txt
     document.querySelector('input[name="filter-by-rate"]').value = minRate
@@ -324,4 +370,26 @@ function cleanStats(stats) {
         return acc
     }, [])
     return cleanedStats
+}
+
+function onToggleTheme() {
+    const root = document.documentElement
+    const btn = document.querySelector('.btn-theme')
+
+    root.classList.toggle('alt-theme')
+
+    btn.innerText =
+        root.classList.contains('alt-theme')
+            ? 'Purple theme'
+            : 'Blue theme'
+}
+
+function setThemeButtonText() {
+    const root = document.documentElement
+    const btn = document.querySelector('.btn-theme')
+
+    btn.innerText =
+        root.classList.contains('alt-theme')
+            ? 'Purple theme'
+            : 'Blue theme'
 }
