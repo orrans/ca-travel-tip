@@ -69,6 +69,16 @@ function renderLocs(locs) {
 }
 
 function onRemoveLoc(locId) {
+    Swal.fire({
+    title: 'Delete this location?',
+    text: 'This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel'
+}).then(res => {
+    if (!res.isConfirmed) return
+
     locService.remove(locId)
         .then(() => {
             flashMsg('Location removed')
@@ -79,6 +89,7 @@ function onRemoveLoc(locId) {
             console.error('OOPs:', err)
             flashMsg('Cannot remove location')
         })
+})
 }
 
 function onSearchAddress(ev) {
