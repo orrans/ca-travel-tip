@@ -126,7 +126,8 @@ function onSearchAddress(ev) {
 }
 
 function onAddLoc(geo) {
-    const locName = prompt('Loc name', geo.address || 'Just a place')
+    // const locName = prompt('Loc name', geo.address || 'Just a place')
+    const locName = openLocDialog('add', null, geo)
     if (!locName) return
 
     const loc = {
@@ -175,7 +176,8 @@ function onPanToUserPos() {
 
 function onUpdateLoc(locId) {
     locService.getById(locId).then((loc) => {
-        const rate = +prompt('New rate?', loc.rate)
+        // const rate = +prompt('New rate?', loc.rate)
+        const rate = openLocDialog('edit', loc)
         if (rate && rate !== loc.rate) {
             loc.rate = rate
             locService
@@ -379,4 +381,42 @@ function setThemeButtonText() {
         root.classList.contains('alt-theme')
             ? 'Purple theme'
             : 'Blue theme'
+}
+
+function openLocDialog(mode, loc = null, geo = null) {
+
+    const dialog = document.querySelector('.loc-dialog')
+    const elCancelBtn = document.querySelector('.btn-cancel')
+    dialog.querySelector('.dialog-title').innerText =
+        (mode === 'add') ? 'Add Location' : 'Edit Location'
+
+    dialog.querySelector('[name=loc-name]').value =
+        (mode === 'edit') ? loc.name : (geo?.address || '')
+
+    dialog.querySelector('[name=loc-rate]').value =
+        (mode === 'edit') ? loc.rate : 3
+elCancelBtn.onclick=()=>{
+    dialog.close('cancel')
+}
+    dialog.showModal()
+   
+    dialog.addEventListener('close', () => {
+console.log(dialog.returnValue)
+        if (dialog.returnValue !== 'save') return
+
+        const name = dialog.querySelector('[name=loc-name]').value
+        const rate = +dialog.querySelector('[name=loc-rate]').value
+
+        if (mode === 'add') {
+            locService.save({ name, rate, geo })
+                .then(savedLoc => {
+utilService.updateQueryParams({ locId: savedLoc.id })
+                    loadAndRenderLocs()
+                })
+        } else {
+            loc.name = name
+            loc.rate = rate
+            locService.save(loc).then(loadAndRenderLocs)
+        }
+    }, { once: true })
 }
