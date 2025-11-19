@@ -189,7 +189,7 @@ function onSelectLoc(locId) {
 function openLocDialog(mode, loc = null, geo = null) {
 
     const dialog = document.querySelector('.loc-dialog')
-    const elCancelBtn = document.querySelector('.btn-cancel')
+    
     dialog.querySelector('.dialog-title').innerText =
         (mode === 'add') ? 'Add Location' : 'Edit Location'
 
@@ -198,9 +198,6 @@ function openLocDialog(mode, loc = null, geo = null) {
 
     dialog.querySelector('[name=loc-rate]').value =
         (mode === 'edit') ? loc.rate : 3
-elCancelBtn.onclick=()=>{
-    dialog.close('cancel')
-}
     dialog.showModal()
    
     dialog.addEventListener('close', () => {
