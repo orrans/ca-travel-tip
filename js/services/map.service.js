@@ -1,30 +1,27 @@
-
 export const mapService = {
     initMap,
     getUserPosition,
     setMarker,
     panTo,
     lookupAddressGeo,
-    addClickListener
+    addClickListener,
 }
 
 // TODO: Enter your API Key
-const API_KEY = ''
+const API_KEY = 'AIzaSyDYMMQhVbHPW8Byxi45qiElOS9If8QMtUw'
 var gMap
 var gMarker
 
 function initMap(lat = 32.0749831, lng = 34.9120554) {
-    return _connectGoogleApi()
-        .then(() => {
-            gMap = new google.maps.Map(
-                document.querySelector('.map'), {
-                center: { lat, lng },
-                zoom: 8
-            })
+    return _connectGoogleApi().then(() => {
+        gMap = new google.maps.Map(document.querySelector('.map'), {
+            center: { lat, lng },
+            zoom: 8,
         })
+    })
 }
 
-function panTo({lat, lng, zoom=15}) {
+function panTo({ lat, lng, zoom = 15 }) {
     const laLatLng = new google.maps.LatLng(lat, lng)
     gMap.panTo(laLatLng)
     gMap.setZoom(zoom)
@@ -36,27 +33,27 @@ function lookupAddressGeo(geoOrAddress) {
     // const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=40.714224,-73.961452`
 
     var url = `https://maps.googleapis.com/maps/api/geocode/json?key=${API_KEY}&`
-    url += (geoOrAddress.lat) ? `latlng=${geoOrAddress.lat},${geoOrAddress.lng}` :
-        `address=${geoOrAddress}`
+    url += geoOrAddress.lat
+        ? `latlng=${geoOrAddress.lat},${geoOrAddress.lng}`
+        : `address=${geoOrAddress}`
 
     return fetch(url)
-        .then(res => res.json())
-        .then(res => {
+        .then((res) => res.json())
+        .then((res) => {
             // console.log('RES IS', res)
             if (!res.results.length) return new Error('Found nothing')
             res = res.results[0]
-            const {formatted_address, geometry} = res
+            const { formatted_address, geometry } = res
 
             const geo = {
                 address: formatted_address.substring(formatted_address.indexOf(' ')).trim(),
                 lat: geometry.location.lat,
                 lng: geometry.location.lng,
-                zoom: gMap.getZoom()
+                zoom: gMap.getZoom(),
             }
             // console.log('GEO IS', geo)
             return geo
         })
-
 }
 
 function addClickListener(cb) {
@@ -67,12 +64,12 @@ function addClickListener(cb) {
 }
 
 function setMarker(loc) {
-    (gMarker) && gMarker.setMap(null)
+    gMarker && gMarker.setMap(null)
     if (!loc) return
     gMarker = new google.maps.Marker({
         position: loc.geo,
         map: gMap,
-        title: loc.name
+        title: loc.name,
     })
 }
 
@@ -82,7 +79,7 @@ function getUserPosition() {
         function onSuccess(res) {
             const latLng = {
                 lat: res.coords.latitude,
-                lng: res.coords.longitude
+                lng: res.coords.longitude,
             }
             resolve(latLng)
         }
